@@ -1,3 +1,9 @@
+data/
+spec2spec/data/
+spec2spec/lightning_logs/
+.vscode/
+Dev.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
