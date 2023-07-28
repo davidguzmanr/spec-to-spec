@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 import torch
+import torch.nn as nn
 from dataset import DenoisingDataModule, DenoisingDataset
 from model import DnCNN
 from pytorch_lightning import LightningModule
@@ -17,6 +18,7 @@ class SpecDenoiser(LightningModule):
         self.save_hyperparameters()
 
         self.model = DnCNN()
+        self.loss = nn.MSELoss(reduction='mean')
 
     def forward(self, x):
         return self.model(x)
@@ -24,7 +26,7 @@ class SpecDenoiser(LightningModule):
     def training_step(self, batch, batch_idx):
         clean, noisy = batch
         out = self.forward(noisy)  # predicted clean
-        loss = F.mse_loss(out, clean, reduction="sum")
+        loss = self.loss(out, clean)
 
         self.log("train/loss", loss)
 
@@ -55,7 +57,7 @@ class SpecDenoiser(LightningModule):
     def validation_step(self, batch, batch_idx):
         clean, noisy = batch
         out = self.forward(noisy)  # predicted clean
-        loss = F.mse_loss(out, clean, reduction="sum")
+        loss = self.loss(out, clean)
 
         self.log("val/loss", loss)
 
@@ -86,7 +88,7 @@ class SpecDenoiser(LightningModule):
     def test_step(self, batch, batch_idx):
         clean, noisy = batch
         out = self.forward(noisy)  # predicted clean
-        loss = F.mse_loss(out, clean, reduction="sum")
+        loss = self.loss(out, clean)
 
         self.log("test/loss", loss)
 
