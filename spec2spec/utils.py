@@ -1,13 +1,12 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Conv1d, ConvTranspose1d
 from torch.nn.utils import remove_weight_norm, weight_norm
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-import numpy as np
 
 sns.set_style("darkgrid")
 
@@ -172,7 +171,7 @@ class Generator(torch.nn.Module):
         return x
 
     def remove_weight_norm(self):
-        print("Removing weight norm...")
+        # print("Removing weight norm...")
         for layer in self.ups:
             remove_weight_norm(layer)
         for layer in self.resblocks:
@@ -319,11 +318,15 @@ def plot_pairs(
 
 
 def get_audios(
-    vocoder: Generator,
+    vocoder_path: str,
     noisy_batch: torch.Tensor,
     ground_truth_batch: torch.Tensor,
     prediction_batch: torch.Tensor,
 ):
+    vocoder = get_vocoder(
+        vocoder_path,
+        device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+    )
     # Grab the one that doesn't have zero padding (extra zeros mess up the distribution)
     index = [
         i

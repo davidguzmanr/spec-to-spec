@@ -1,17 +1,14 @@
+from typing import Any, Optional
+
 import torch
+from dataset import DenoisingDataModule, DenoisingDataset
+from model import DnCNN
+from pytorch_lightning import LightningModule
+from pytorch_lightning.cli import LightningCLI
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 from torchmetrics import Accuracy
-
-from pytorch_lightning import LightningModule
-from pytorch_lightning.cli import LightningCLI
-
-from dataset import DenoisingDataset, DenoisingDataModule
-from model import DnCNN
-
-from typing import Any, Optional
-
-from utils import plot_pairs, get_vocoder, get_audios
+from utils import get_audios, get_vocoder, plot_pairs
 
 
 class SpecDenoiser(LightningModule):
@@ -21,12 +18,6 @@ class SpecDenoiser(LightningModule):
 
         self.model = DnCNN()
 
-        if vocoder_path:
-            self.vocoder = get_vocoder(
-                vocoder_path,
-                device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-            )
-
     def forward(self, x):
         return self.model(x)
 
@@ -35,15 +26,16 @@ class SpecDenoiser(LightningModule):
         out = self.forward(noisy)  # predicted clean
         loss = F.mse_loss(out, clean, reduction="sum")
 
-        self.log("train/loss", loss, on_step=True, on_epoch=False)
+        self.log("train/loss", loss)
 
-        if batch_idx == 0:
+        if batch_idx == self.trainer.num_training_batches - 1:
             self.logger.experiment.add_figure(
                 f"train/specs", plot_pairs(noisy, clean, out), self.global_step
             )
+
             if self.hparams.vocoder_path:
                 noisy_wav, clean_wav, out_wav = get_audios(
-                    self.vocoder, noisy, clean, out
+                    self.hparams.vocoder_path, noisy, clean, out
                 )
 
                 self.logger.experiment.add_audio(
@@ -65,15 +57,16 @@ class SpecDenoiser(LightningModule):
         out = self.forward(noisy)  # predicted clean
         loss = F.mse_loss(out, clean, reduction="sum")
 
-        self.log("val_loss", loss, on_step=True, on_epoch=False)
+        self.log("val/loss", loss)
 
-        if batch_idx == 0:
+        if batch_idx == self.trainer.num_val_batches[0] - 1:
             self.logger.experiment.add_figure(
                 f"val/specs", plot_pairs(noisy, clean, out), self.global_step
             )
+
             if self.hparams.vocoder_path:
                 noisy_wav, clean_wav, out_wav = get_audios(
-                    self.vocoder, noisy, clean, out
+                    self.hparams.vocoder_path, noisy, clean, out
                 )
 
                 self.logger.experiment.add_audio(
@@ -95,16 +88,16 @@ class SpecDenoiser(LightningModule):
         out = self.forward(noisy)  # predicted clean
         loss = F.mse_loss(out, clean, reduction="sum")
 
-        self.log("test_loss", loss, on_step=True, on_epoch=False)
+        self.log("test/loss", loss)
 
-        if batch_idx == 0:
+        if batch_idx == self.trainer.num_test_batches[0] - 1:
             self.logger.experiment.add_figure(
                 f"test/specs", plot_pairs(noisy, clean, out), self.global_step
             )
-            # TODO: add audios from the predictions
+
             if self.hparams.vocoder_path:
                 noisy_wav, clean_wav, out_wav = get_audios(
-                    self.vocoder, noisy, clean, out
+                    self.hparams.vocoder_path, noisy, clean, out
                 )
 
                 self.logger.experiment.add_audio(

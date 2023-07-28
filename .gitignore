@@ -1,8 +1,9 @@
-data/
-spec2spec/data/
+spec2spec/data/clean
+spec2spec/data/noisy
 spec2spec/lightning_logs/
 .vscode/
 Dev.ipynb
+spec2spec/data/generator_universal.pth.tar
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
