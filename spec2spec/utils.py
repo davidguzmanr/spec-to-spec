@@ -311,8 +311,11 @@ def plot_pairs(
             + ["After"] * len(residual_after),
         }
     )
-    sns.histplot(data=data, x="x", hue="Label", kde=True, stat="density", ax=ax5)
+    sns.histplot(
+        data=data, x="x", hue="Label", kde=True, stat="density", ax=ax5, bins=100
+    )
     ax5.set_title(f"Residual distribution", fontsize=10, weight="bold")
+    ax5.set_xlim(-4, 4)
 
     return fig
 

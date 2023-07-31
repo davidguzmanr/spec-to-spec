@@ -13,7 +13,12 @@ from utils import get_audios, get_vocoder, plot_pairs
 
 
 class SpecDenoiser(LightningModule):
-    def __init__(self, lr: float = 1e-4, vocoder_path: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        lr: float = 1e-4,
+        weight_decay: float = 0.0,
+        vocoder_path: Optional[str] = None,
+    ) -> None:
         super(SpecDenoiser, self).__init__()
         self.save_hyperparameters()
 
@@ -30,9 +35,11 @@ class SpecDenoiser(LightningModule):
 
         self.log("train/loss", loss)
 
-        if batch_idx == self.trainer.num_training_batches - 1:
+        if (batch_idx == 0) or (batch_idx == self.trainer.num_training_batches - 1):
             self.logger.experiment.add_figure(
-                f"train/specs", plot_pairs(noisy, clean, out), self.global_step
+                f"train/batch-{batch_idx}",
+                plot_pairs(noisy, clean, out),
+                self.global_step,
             )
 
             if self.hparams.vocoder_path:
@@ -41,15 +48,24 @@ class SpecDenoiser(LightningModule):
                 )
 
                 self.logger.experiment.add_audio(
-                    "train/noisy", noisy_wav, self.global_step, sample_rate=22050
+                    f"train/noisy-{batch_idx}",
+                    noisy_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
                 self.logger.experiment.add_audio(
-                    "train/clean", clean_wav, self.global_step, sample_rate=22050
+                    f"train/clean-{batch_idx}",
+                    clean_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
                 self.logger.experiment.add_audio(
-                    "train/denoised", out_wav, self.global_step, sample_rate=22050
+                    f"train/denoised-{batch_idx}",
+                    out_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
         return loss
@@ -61,9 +77,11 @@ class SpecDenoiser(LightningModule):
 
         self.log("val/loss", loss)
 
-        if batch_idx == self.trainer.num_val_batches[0] - 1:
+        if (batch_idx == 0) or (batch_idx == self.trainer.num_val_batches[0] - 1):
             self.logger.experiment.add_figure(
-                f"val/specs", plot_pairs(noisy, clean, out), self.global_step
+                f"val/batch-{batch_idx}",
+                plot_pairs(noisy, clean, out),
+                self.global_step,
             )
 
             if self.hparams.vocoder_path:
@@ -72,15 +90,24 @@ class SpecDenoiser(LightningModule):
                 )
 
                 self.logger.experiment.add_audio(
-                    "val/noisy", noisy_wav, self.global_step, sample_rate=22050
+                    f"val/noisy-{batch_idx}",
+                    noisy_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
                 self.logger.experiment.add_audio(
-                    "val/clean", clean_wav, self.global_step, sample_rate=22050
+                    f"val/clean-{batch_idx}",
+                    clean_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
                 self.logger.experiment.add_audio(
-                    "val/denoised", out_wav, self.global_step, sample_rate=22050
+                    f"val/denoised-{batch_idx}",
+                    out_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
         return loss
@@ -92,9 +119,11 @@ class SpecDenoiser(LightningModule):
 
         self.log("test/loss", loss)
 
-        if batch_idx == self.trainer.num_test_batches[0] - 1:
+        if (batch_idx == 0) or (batch_idx == self.trainer.num_test_batches[0] - 1):
             self.logger.experiment.add_figure(
-                f"test/specs", plot_pairs(noisy, clean, out), self.global_step
+                f"test/batch-{batch_idx}",
+                plot_pairs(noisy, clean, out),
+                self.global_step,
             )
 
             if self.hparams.vocoder_path:
@@ -103,23 +132,33 @@ class SpecDenoiser(LightningModule):
                 )
 
                 self.logger.experiment.add_audio(
-                    "test/noisy", noisy_wav, self.global_step, sample_rate=22050
+                    f"test/noisy-{batch_idx}",
+                    noisy_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
                 self.logger.experiment.add_audio(
-                    "test/clean", clean_wav, self.global_step, sample_rate=22050
+                    f"test/clean-{batch_idx}",
+                    clean_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
                 self.logger.experiment.add_audio(
-                    "test/denoised", out_wav, self.global_step, sample_rate=22050
+                    f"test/denoised-{batch_idx}",
+                    out_wav,
+                    self.global_step,
+                    sample_rate=22050,
                 )
 
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(
+        optimizer = torch.optim.SGD(
             self.model.parameters(),
             lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
         )
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1)
         # return [optimizer], [scheduler]
