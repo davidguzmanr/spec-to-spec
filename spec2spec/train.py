@@ -1,29 +1,37 @@
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 import torch
 import torch.nn as nn
-from dataset import DenoisingDataModule, DenoisingDataset
-from model import DnCNN
+from dataset import DenoisingDataModule
+from models import DnCNN, PostNet
 from pytorch_lightning import LightningModule
 from pytorch_lightning.cli import LightningCLI
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
-from utils import get_audios, get_vocoder, plot_pairs
+from utils import get_audios, plot_pairs
 
 
 class SpecDenoiser(LightningModule):
     def __init__(
         self,
-        lr: float = 1e-4,
+        lr: float = 1e-3,
         weight_decay: float = 0.0,
+        loss: str = 'mse',
         vocoder_path: Optional[str] = None,
+        network: str = 'DnCNN',
+        network_kwargs: Optional[Dict] = None,
     ) -> None:
         super(SpecDenoiser, self).__init__()
         self.save_hyperparameters()
 
-        self.model = DnCNN()
-        self.loss = nn.MSELoss(reduction='mean')
+        if self.hparams.network == 'DnCNN':
+            self.model = DnCNN(**self.hparams.network_kwargs)
+        elif self.hparams.network == 'PostNet':
+            self.model = PostNet(**self.hparams.network_kwargs)
+
+        if self.hparams.loss == 'mse':
+            self.loss = nn.MSELoss(reduction='mean')
+        elif self.hparams.loss == 'l1':
+            self.loss = nn.L1Loss(reduction='mean')
 
     def forward(self, x):
         return self.model(x)
@@ -155,7 +163,7 @@ class SpecDenoiser(LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(
+        optimizer = torch.optim.Adam(
             self.model.parameters(),
             lr=self.hparams.lr,
             weight_decay=self.hparams.weight_decay,

@@ -1,0 +1,40 @@
+# pytorch_lightning==1.8.1
+seed_everything: 42
+trainer:
+  logger: true
+  enable_checkpointing: true
+  devices: 1
+  enable_progress_bar: true
+  max_epochs: 100
+  max_steps: 100000
+  log_every_n_steps: 10
+  accelerator: auto
+  inference_mode: true
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+        log_momentum: false
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: val/loss
+        save_last: true
+        save_top_k: 3
+model:
+  lr: 0.001
+  weight_decay: 0.0
+  vocoder_path: data/generator_universal.pth.tar
+  network: PostNet
+  network_kwargs:
+    n_mel_channels: 80
+    postnet_embedding_dim: 512
+    postnet_kernel_size: 5
+    postnet_n_convolutions: 5
+data:
+  data_dir: data
+  train_filelist: data/train.txt
+  val_filelist: data/val.txt
+  test_filelist: data/test.txt
+  sort: true
+  batch_size: 16
+  num_workers: 4

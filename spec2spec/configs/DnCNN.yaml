@@ -24,6 +24,13 @@ model:
   lr: 0.001
   weight_decay: 0.0
   vocoder_path: data/generator_universal.pth.tar
+  network: DnCNN
+  network_kwargs:
+    depth: 17
+    n_channels: 64
+    image_channels: 1
+    kernel_size: 3
+    padding: 1
 data:
   data_dir: data
   train_filelist: data/train.txt
