@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 import torch
 import torch.nn as nn
 from dataset import DenoisingDataModule
-from models import DnCNN, PostNet
+from models import DnCNN, PostNet, DnCNNConfig, PostNetConfig
 from pytorch_lightning import LightningModule
 from pytorch_lightning.cli import LightningCLI
 from torch.nn import functional as F
@@ -24,9 +24,11 @@ class SpecDenoiser(LightningModule):
         self.save_hyperparameters()
 
         if self.hparams.network == 'DnCNN':
-            self.model = DnCNN(**self.hparams.network_kwargs)
+            config = DnCNNConfig(**self.hparams.network_kwargs)
+            self.model = DnCNN(**config.dict())
         elif self.hparams.network == 'PostNet':
-            self.model = PostNet(**self.hparams.network_kwargs)
+            config = PostNetConfig(**self.hparams.network_kwargs)
+            self.model = PostNet(**config.dict())
 
         if self.hparams.loss == 'mse':
             self.loss = nn.MSELoss(reduction='mean')

@@ -1,6 +1,22 @@
 import torch
 import torch.nn as nn
+from pydantic import BaseModel
 from torch.nn import functional as F
+
+
+class DnCNNConfig(BaseModel):
+    depth: int = 17
+    n_channels: int = 64
+    image_channels: int = 1
+    kernel_size: int = 3
+    padding: int = 1
+
+
+class PostNetConfig(BaseModel):
+    n_mel_channels: int = 80
+    postnet_embedding_dim: int = 512
+    postnet_kernel_size: int = 5
+    postnet_n_convolutions: int = 5
 
 
 class DnCNN(nn.Module):
