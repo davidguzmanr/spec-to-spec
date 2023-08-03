@@ -25,10 +25,10 @@ class SpecDenoiser(LightningModule):
 
         if self.hparams.network == 'DnCNN':
             config = DnCNNConfig(**self.hparams.network_kwargs)
-            self.model = DnCNN(**config.dict())
+            self.model = DnCNN(config)
         elif self.hparams.network == 'PostNet':
             config = PostNetConfig(**self.hparams.network_kwargs)
-            self.model = PostNet(**config.dict())
+            self.model = PostNet(config)
 
         if self.hparams.loss == 'mse':
             self.loss = nn.MSELoss(reduction='mean')

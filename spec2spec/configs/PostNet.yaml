@@ -23,6 +23,7 @@ trainer:
 model:
   lr: 0.001
   weight_decay: 0.0
+  loss: mse
   vocoder_path: data/generator_universal.pth.tar
   network: PostNet
   network_kwargs:
@@ -36,5 +37,7 @@ data:
   val_filelist: data/val.txt
   test_filelist: data/test.txt
   sort: true
+  split: true
+  segment_size: 32
   batch_size: 16
   num_workers: 4

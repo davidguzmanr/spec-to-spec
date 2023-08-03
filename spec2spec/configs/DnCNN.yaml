@@ -5,7 +5,7 @@ trainer:
   enable_checkpointing: true
   devices: 1
   enable_progress_bar: true
-  max_epochs: 100
+  max_epochs: 1000
   max_steps: 100000
   log_every_n_steps: 10
   accelerator: auto
@@ -23,6 +23,7 @@ trainer:
 model:
   lr: 0.001
   weight_decay: 0.0
+  loss: mse
   vocoder_path: data/generator_universal.pth.tar
   network: DnCNN
   network_kwargs:
@@ -37,5 +38,7 @@ data:
   val_filelist: data/val.txt
   test_filelist: data/test.txt
   sort: true
+  split: true
+  segment_size: 32
   batch_size: 16
   num_workers: 4

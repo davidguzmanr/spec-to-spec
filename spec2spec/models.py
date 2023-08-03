@@ -20,10 +20,14 @@ class PostNetConfig(BaseModel):
 
 
 class DnCNN(nn.Module):
-    def __init__(
-        self, depth=17, n_channels=64, image_channels=1, kernel_size=3, padding=1
-    ):
+    def __init__(self, config: DnCNNConfig):
         super(DnCNN, self).__init__()
+
+        depth = config.depth
+        n_channels = config.n_channels
+        image_channels = config.image_channels
+        kernel_size = config.kernel_size
+        padding = config.padding
 
         layers = []
 
@@ -112,14 +116,14 @@ class PostNet(nn.Module):
     PostNet: Five 1-d convolution with 512 channels and kernel size 5
     """
 
-    def __init__(
-        self,
-        n_mel_channels=80,
-        postnet_embedding_dim=512,
-        postnet_kernel_size=5,
-        postnet_n_convolutions=5,
-    ):
+    def __init__(self, config: PostNetConfig):
         super(PostNet, self).__init__()
+
+        n_mel_channels = config.n_mel_channels
+        postnet_embedding_dim = config.postnet_embedding_dim
+        postnet_kernel_size = config.postnet_kernel_size
+        postnet_n_convolutions = config.postnet_n_convolutions
+
         self.convolutions = nn.ModuleList()
 
         self.convolutions.append(

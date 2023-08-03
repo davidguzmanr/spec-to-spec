@@ -1,11 +1,14 @@
 from os import listdir
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 
 import pandas as pd
 import torch
+import random
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
+
+random.seed(42)
 
 
 class DenoisingDataset(Dataset):
@@ -14,6 +17,8 @@ class DenoisingDataset(Dataset):
         data_dir: Union[Path, str],
         filelist: Union[Path, str],
         sort: bool = True,
+        split: bool = True,
+        segment_size: int = 32,
     ) -> None:
         """
         Custom PyTorch Dataset for denoising data.
@@ -29,6 +34,8 @@ class DenoisingDataset(Dataset):
         self.data_dir = Path(data_dir)
         self.filelist = Path(filelist)
         self.sort = sort
+        self.split = split
+        self.segment_size = segment_size
 
         self.clean_path = self.data_dir / "clean"
         self.noisy_path = self.data_dir / "noisy"
@@ -61,7 +68,29 @@ class DenoisingDataset(Dataset):
         clean = torch.load(self.clean_files[index]).unsqueeze(0)
         noisy = torch.load(self.noisy_files[index]).unsqueeze(0)
 
-        # TODO: when there is a mismatch in the shapes, should we trim or pad?
+        # Get the minimum length between them (in case there is a mismatch) and trim
+        min_length = min(clean.size(-1), noisy.size(-1))
+
+        # Trim both tensors to the minimum length
+        clean = clean[..., :min_length]
+        noisy = noisy[..., :min_length]
+
+        # Grab a random segment of size segment_size
+        if self.split:
+            if clean.size(-1) >= self.segment_size:
+                max_start = clean.size(-1) - self.segment_size
+                start = random.randint(0, max_start)
+
+                clean = clean[..., start : start + self.segment_size]
+                noisy = noisy[..., start : start + self.segment_size]
+
+            else:  # We will never use this due to the small segment_size
+                clean = torch.nn.functional.pad(
+                    clean, (0, self.segment_size - clean.size(-1)), 'constant'
+                )
+                noisy = torch.nn.functional.pad(
+                    noisy, (0, self.segment_size - noisy.size(-1)), 'constant'
+                )
 
         return clean, noisy
 
@@ -105,6 +134,8 @@ class DenoisingDataModule(LightningDataModule):
         val_filelist: Union[Path, str] = 'data/val.txt',
         test_filelist: Union[Path, str] = 'data/test.txt',
         sort: bool = True,
+        split: bool = True,
+        segment_size: int = 32,
         batch_size: int = 64,
         num_workers: int = 4,
     ) -> None:
@@ -129,18 +160,22 @@ class DenoisingDataModule(LightningDataModule):
             data_dir=self.hparams.data_dir,
             filelist=self.hparams.train_filelist,
             sort=self.hparams.sort,
+            split=self.hparams.split,
+            segment_size=self.hparams.segment_size,
         )
 
         self.val_dataset = DenoisingDataset(
             data_dir=self.hparams.data_dir,
             filelist=self.hparams.val_filelist,
-            sort=self.hparams.sort,
+            sort=True,
+            split=False,
         )
 
         self.test_dataset = DenoisingDataset(
             data_dir=self.hparams.data_dir,
             filelist=self.hparams.test_filelist,
-            sort=self.hparams.sort,
+            sort=True,
+            split=False,
         )
 
     def train_dataloader(self):
