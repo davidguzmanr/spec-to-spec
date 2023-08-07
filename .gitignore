@@ -1,10 +1,3 @@
-spec2spec/data/clean
-spec2spec/data/noisy
-spec2spec/lightning_logs/
-.vscode/
-Dev.ipynb
-spec2spec/data/generator_universal.pth.tar
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -165,3 +158,11 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+spec2spec/data/clean
+spec2spec/data/noisy
+spec2spec/lightning_logs/
+.vscode/
+Dev.ipynb
+spec2spec/data/generator_universal.pth.tar
+spec2spec/data/postnet.pt

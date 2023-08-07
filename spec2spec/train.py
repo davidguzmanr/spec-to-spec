@@ -23,11 +23,15 @@ class SpecDenoiser(LightningModule):
         super(SpecDenoiser, self).__init__()
         self.save_hyperparameters()
 
+        network_kwargs = (
+            {} if self.hparams.network_kwargs is None else self.hparams.network_kwargs
+        )
+
         if self.hparams.network == 'DnCNN':
-            config = DnCNNConfig(**self.hparams.network_kwargs)
+            config = DnCNNConfig(**network_kwargs)
             self.model = DnCNN(config)
         elif self.hparams.network == 'PostNet':
-            config = PostNetConfig(**self.hparams.network_kwargs)
+            config = PostNetConfig(**network_kwargs)
             self.model = PostNet(config)
 
         if self.hparams.loss == 'mse':
