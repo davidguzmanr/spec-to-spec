@@ -111,19 +111,29 @@ class DenoisingDataset(Dataset):
         # Pad each tensor in the batch to the maximum length
         padded_clean = []
         padded_noisy = []
+        masks = []
+
         for clean, noisy in batch:
-            padded_clean.append(
-                torch.nn.functional.pad(clean, (0, max_length - clean.shape[-1]))
+            pad_clean = torch.nn.functional.pad(
+                clean, (0, max_length - clean.shape[-1])
             )
-            padded_noisy.append(
-                torch.nn.functional.pad(noisy, (0, max_length - noisy.shape[-1]))
+            pad_noisy = torch.nn.functional.pad(
+                noisy, (0, max_length - noisy.shape[-1])
             )
+
+            mask = torch.ones_like(pad_clean)
+            mask[..., clean.shape[-1] :] = 0  # Set padding region to 0 in mask
+
+            padded_clean.append(pad_clean)
+            padded_noisy.append(pad_noisy)
+            masks.append(mask.bool())
 
         # Stack the padded tensors to create the batch
         padded_clean = torch.stack(padded_clean)
         padded_noisy = torch.stack(padded_noisy)
+        masks = torch.stack(masks)
 
-        return padded_clean, padded_noisy
+        return {'clean': padded_clean, 'noisy': padded_noisy, 'mask': masks}
 
 
 class DenoisingDataModule(LightningDataModule):

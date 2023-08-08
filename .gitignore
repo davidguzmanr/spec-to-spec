@@ -166,3 +166,6 @@ spec2spec/lightning_logs/
 Dev.ipynb
 spec2spec/data/generator_universal.pth.tar
 spec2spec/data/postnet.pt
+spec2spec/data/metadata.csv
+spec2spec/data/last.ckpt
+spec2spec/data/scheduler.pt

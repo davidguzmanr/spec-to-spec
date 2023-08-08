@@ -43,8 +43,11 @@ class SpecDenoiser(LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        clean, noisy = batch
-        out = self.forward(noisy)  # predicted clean
+        clean = batch['clean']
+        noisy = batch['noisy']
+        mask = batch['mask']
+        
+        out = self.forward(noisy) * mask  # predicted clean
         loss = self.loss(out, clean)
 
         self.log("train/loss", loss)
@@ -85,8 +88,11 @@ class SpecDenoiser(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        clean, noisy = batch
-        out = self.forward(noisy)  # predicted clean
+        clean = batch['clean']
+        noisy = batch['noisy']
+        mask = batch['mask']
+        
+        out = self.forward(noisy) * mask  # predicted clean
         loss = self.loss(out, clean)
 
         self.log("val/loss", loss)
@@ -127,8 +133,11 @@ class SpecDenoiser(LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
-        clean, noisy = batch
-        out = self.forward(noisy)  # predicted clean
+        clean = batch['clean']
+        noisy = batch['noisy']
+        mask = batch['mask']
+        
+        out = self.forward(noisy) * mask  # predicted clean
         loss = self.loss(out, clean)
 
         self.log("test/loss", loss)
