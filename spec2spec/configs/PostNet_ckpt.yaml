@@ -5,15 +5,15 @@ trainer:
   enable_checkpointing: true
   devices: 1
   enable_progress_bar: true
-  max_epochs: 20000
-  max_steps: 20000
+  max_epochs: 100
+  max_steps: -1
   log_every_n_steps: 10
   accelerator: auto
   inference_mode: true
   callbacks:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
       init_args:
-        logging_interval: epoch
+        logging_interval: step
         log_momentum: false
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint
       init_args:
@@ -21,8 +21,8 @@ trainer:
         save_last: true
         save_top_k: 3
 model:
-  lr: 0.001
-  weight_decay: 0.0
+  lr: 0.0001
+  weight_decay: 0.01
   loss: mse
   vocoder_path: /home/eng000/sgile/models/hifigan/generator_universal.pth.tar
   network: PostNet
@@ -32,10 +32,10 @@ model:
     postnet_kernel_size: 5
     postnet_n_convolutions: 5
 data:
-  data_dir: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation
-  train_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation/train.txt
-  val_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation/val.txt
-  test_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation/test.txt
+  data_dir: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/original-output
+  train_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/train.txt
+  val_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/val.txt
+  test_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/test.txt
   sort: false
   split: false
   segment_size: 32

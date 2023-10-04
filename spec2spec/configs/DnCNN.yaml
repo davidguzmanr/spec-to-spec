@@ -5,8 +5,8 @@ trainer:
   enable_checkpointing: true
   devices: 1
   enable_progress_bar: true
-  max_epochs: 1000
-  max_steps: 100000
+  max_epochs: 20000
+  max_steps: 20000
   log_every_n_steps: 10
   accelerator: auto
   inference_mode: true
@@ -24,7 +24,7 @@ model:
   lr: 0.001
   weight_decay: 0.0
   loss: mse
-  vocoder_path: data/generator_universal.pth.tar
+  vocoder_path: /home/eng000/sgile/models/hifigan/generator_universal.pth.tar
   network: DnCNN
   network_kwargs:
     depth: 17
@@ -33,12 +33,12 @@ model:
     kernel_size: 3
     padding: 1
 data:
-  data_dir: data
-  train_filelist: data/train.txt
-  val_filelist: data/val.txt
-  test_filelist: data/test.txt
-  sort: true
-  split: true
+  data_dir: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation
+  train_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation/train.txt
+  val_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation/val.txt
+  test_filelist: /space/partner/nrc/work/dt/eng000/Experiments/data/spec-to-spec/EveryVoice/60-minutes-english-ablation/test.txt
+  sort: false
+  split: false
   segment_size: 32
   batch_size: 16
   num_workers: 4

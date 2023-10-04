@@ -161,7 +161,9 @@ cython_debug/
 
 spec2spec/data/clean
 spec2spec/data/noisy
-spec2spec/lightning_logs/
+spec2spec/EveryVoice_logs/
+spec2spec/FastSpeech2_logs/
+spec2spec/60-minutes-ablation-logs/
 .vscode/
 Dev.ipynb
 spec2spec/data/generator_universal.pth.tar
@@ -169,3 +171,4 @@ spec2spec/data/postnet.pt
 spec2spec/data/metadata.csv
 spec2spec/data/last.ckpt
 spec2spec/data/scheduler.pt
+*.wav
